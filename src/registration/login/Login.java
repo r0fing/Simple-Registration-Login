@@ -4,6 +4,15 @@
  */
 package registration.login;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author HLC_2021
@@ -102,9 +111,39 @@ public class Login extends javax.swing.JFrame {
 
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginButtonActionPerformed
         // TODO add your handling code here:
+        String userName = userNameField.getText().trim();
+        String password = passwordField.getText().trim();
         
+        String error = checkLogin(userName, password);
+        
+        if (error.equals("")) {
+            // Display success message
+            JOptionPane.showMessageDialog(null,
+                    "You have succesfully logged in",
+                    "Message", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null,
+                    error, "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_loginButtonActionPerformed
 
+    private String checkLogin(String userName, String password) {
+        if (userName.equals("") || password.equals("")) {
+            return "You did not fill in all the fields!";
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader("USER.in"))) {
+            while(reader.ready()) {
+                String[] account = reader.readLine().split(",");
+                if (account[3].equals(userName) && account[4].equals(password)) {
+                    return "";
+                }
+            }
+         } catch (IOException e) {
+            Logger.getLogger(Register.class.getName()).log(Level.SEVERE, null, e);
+        }
+        return "Invalid login information!";
+    }
+    
     /**
      * @param args the command line arguments
      */

@@ -4,9 +4,14 @@
  */
 package registration.login;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**
@@ -180,32 +185,69 @@ public class Register extends javax.swing.JFrame {
 
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginButtonActionPerformed
         // TODO add your handling code here:
+        Login lf = new Login();
+        lf.setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_loginButtonActionPerformed
 
     private void registerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerButtonActionPerformed
         // TODO add your handling code here:
-        String firstName = firstNameField.getText();
-        String userName = userNameField.getText();
-        String lastName = lastNameField.getText();
-        String password = passwordField.getText();
-        String emailAddress = emailAddressField.getText();
-        String mobileNumber = mobileNumberField.getText();
+        ArrayList<String> newAccount = new ArrayList<>();
+        newAccount.add(firstNameField.getText().trim());
+        newAccount.add(lastNameField.getText().trim());
+        newAccount.add(emailAddressField.getText().trim());
+        newAccount.add(userNameField.getText().trim());
+        newAccount.add(passwordField.getText().trim());
+        newAccount.add(mobileNumberField.getText().trim());
         
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("USER.in", true))) {
-            writer.write(firstName + "," + lastName + "," + emailAddress + "," + userName + "," + password + "," + mobileNumber);
+        String error = checkNewUser(newAccount);
+        
+        if (error.equals("")) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("USER.in", true))) {
+            writer.write(newAccount.get(0) + "," + newAccount.get(1) + "," + newAccount.get(2) + "," + newAccount.get(3) + "," + newAccount.get(4) + "," + newAccount.get(5));
             writer.newLine();
 
             // Display success message
             JOptionPane.showMessageDialog(null,
-                    "Welcome, " + firstName + "\nYour account is successfully created.",
+                    "Welcome, " + newAccount.get(0) + "\nYour account is successfully created.",
                     "Message", JOptionPane.INFORMATION_MESSAGE);
-        } catch (IOException e) {
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null,
+                        "Error saving account information.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
             JOptionPane.showMessageDialog(null,
-                    "Error saving account information.",
-                    "Error", JOptionPane.ERROR_MESSAGE);
+                    error, "Error", JOptionPane.ERROR_MESSAGE);
         }
+        
     }//GEN-LAST:event_registerButtonActionPerformed
 
+    private String checkNewUser(ArrayList<String> newAccount) {
+        for (int i = 0; i < newAccount.size(); i++) {
+            if (newAccount.get(i).equals("")) {
+                return "You did not fill in one of the fields!";
+            }
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader("USER.in"))) {
+            while(reader.ready()) {
+                String[] account = reader.readLine().split(",");
+                
+                if (account[2].equals(newAccount.get(2))) {
+                    return "This email address already exists!";
+                }    
+                if (account[3].equals(newAccount.get(3))) {
+                    return "This username already exists!";
+                } 
+                if (account[5].equals(newAccount.get(5))) {
+                    return "This mobile number already exists!";
+                }
+            }
+         } catch (IOException e) {
+            Logger.getLogger(Register.class.getName()).log(Level.SEVERE, null, e);
+        }
+        return "";
+    }
     /**
      * @param args the command line arguments
      */
